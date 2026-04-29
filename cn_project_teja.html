@@ -1,0 +1,1304 @@
+<html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simple Linear Regression — ML Interactive Lab</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&amp;family=DM+Mono:wght@300;400;500&amp;family=Lato:wght@300;400;700&amp;display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --card: #1a2234;
+    --border: #2a3550;
+    --accent: #00d4ff;
+    --accent2: #ff6b6b;
+    --accent3: #ffd166;
+    --text: #e8eaf0;
+    --muted: #7a8aaa;
+    --green: #06d6a0;
+    --purple: #a78bfa;
+    --grad1: linear-gradient(135deg, #00d4ff22, #a78bfa22);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Lato', sans-serif;
+    line-height: 1.75;
+    overflow-x: hidden;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: #0a0e1acc;
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 2.5rem;
+    height: 60px;
+  }
+  .nav-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.25rem;
+    color: var(--accent);
+    letter-spacing: 1px;
+  }
+  .nav-links { display: flex; gap: 0.3rem; }
+  .nav-links a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.8rem;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 1px;
+    padding: 0.4rem 0.9rem;
+    border-radius: 4px;
+    transition: all 0.2s;
+  }
+  .nav-links a:hover { color: var(--accent); background: var(--accent)18; }
+
+  /* ── HERO ── */
+  #hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    text-align: center;
+    padding: 100px 2rem 4rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 60px 60px;
+    opacity: 0.3;
+    animation: gridPulse 8s ease-in-out infinite;
+  }
+  @keyframes gridPulse { 0%,100%{opacity:0.2} 50%{opacity:0.4} }
+  .hero-glow {
+    position: absolute;
+    width: 600px; height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #00d4ff18 0%, transparent 70%);
+    top: 50%; left: 50%; transform: translate(-50%,-50%);
+    animation: glowPulse 4s ease-in-out infinite;
+  }
+  @keyframes glowPulse { 0%,100%{transform:translate(-50%,-50%) scale(1)} 50%{transform:translate(-50%,-50%) scale(1.15)} }
+  .hero-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 3px;
+    color: var(--accent);
+    background: var(--accent)18;
+    border: 1px solid var(--accent)44;
+    padding: 0.4rem 1.2rem;
+    border-radius: 50px;
+    margin-bottom: 1.5rem;
+    animation: fadeUp 0.6s ease both;
+  }
+  .hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.8rem, 7vw, 5.5rem);
+    font-weight: 900;
+    line-height: 1.1;
+    animation: fadeUp 0.7s ease 0.1s both;
+  }
+  .hero-title span { color: var(--accent); }
+  .hero-sub {
+    margin-top: 1.2rem;
+    color: var(--muted);
+    font-size: 1.05rem;
+    max-width: 560px;
+    animation: fadeUp 0.7s ease 0.2s both;
+  }
+  .hero-eq {
+    margin-top: 2rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 1.6rem;
+    color: var(--accent3);
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 0.8rem 2.5rem;
+    border-radius: 12px;
+    animation: fadeUp 0.7s ease 0.3s both;
+  }
+  .hero-btns {
+    display: flex; gap: 1rem; margin-top: 2.5rem; flex-wrap: wrap; justify-content: center;
+    animation: fadeUp 0.7s ease 0.4s both;
+  }
+  .btn {
+    padding: 0.75rem 1.8rem;
+    border-radius: 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    border: none;
+  }
+  .btn-primary { background: var(--accent); color: #000; font-weight: 700; }
+  .btn-primary:hover { background: #00bbdd; transform: translateY(-2px); box-shadow: 0 8px 24px #00d4ff44; }
+  .btn-outline { background: transparent; color: var(--accent); border: 1px solid var(--accent)66; }
+  .btn-outline:hover { background: var(--accent)18; transform: translateY(-2px); }
+  .btn-red { background: var(--accent2); color: #fff; font-weight: 700; }
+  .btn-red:hover { background: #e05555; transform: translateY(-2px); box-shadow: 0 8px 24px #ff6b6b44; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:none} }
+
+  /* ── SECTIONS ── */
+  section { padding: 5rem 2rem; }
+  .section-inner { max-width: 960px; margin: 0 auto; }
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 3px;
+    color: var(--accent);
+    margin-bottom: 0.6rem;
+  }
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 2rem;
+  }
+  .divider { height: 1px; background: var(--border); margin: 0 auto; }
+
+  /* ── CONCEPT CARDS ── */
+  .concept-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+    gap: 1.2rem;
+    margin-top: 2rem;
+  }
+  .concept-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.8rem;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .concept-card:hover { border-color: var(--accent)88; transform: translateY(-4px); }
+  .card-icon { font-size: 2rem; margin-bottom: 1rem; }
+  .card-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--accent);
+    letter-spacing: 1px;
+    margin-bottom: 0.6rem;
+  }
+  .card-body { color: var(--muted); font-size: 0.93rem; }
+
+  /* ── STEPWISE TABLE ── */
+  .step-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-top: 1.5rem;
+    font-size: 0.88rem;
+  }
+  .step-table th {
+    background: var(--accent)22;
+    color: var(--accent);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    padding: 0.8rem 1rem;
+    text-align: left;
+    border-bottom: 2px solid var(--accent)55;
+  }
+  .step-table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    background: var(--card);
+    font-family: 'DM Mono', monospace;
+  }
+  .step-table tr:last-child td { border-bottom: none; }
+  .step-table tr:hover td { background: var(--surface); }
+  .highlight { color: var(--accent3); }
+  .highlight2 { color: var(--green); }
+
+  /* ── WORKED EXAMPLE ── */
+  .example-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-top: 1.5rem;
+  }
+  .example-steps { list-style: none; counter-reset: step; }
+  .example-steps li {
+    counter-increment: step;
+    position: relative;
+    padding: 1rem 1rem 1rem 3.5rem;
+    border-left: 2px solid var(--border);
+    margin-left: 1.2rem;
+    margin-bottom: 0.5rem;
+  }
+  .example-steps li::before {
+    content: counter(step);
+    position: absolute;
+    left: -1.2rem;
+    top: 1rem;
+    width: 2rem; height: 2rem;
+    background: var(--accent);
+    color: #000;
+    font-family: 'DM Mono', monospace;
+    font-weight: 700;
+    font-size: 0.8rem;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .math {
+    font-family: 'DM Mono', monospace;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    color: var(--accent3);
+    display: block;
+    margin: 0.6rem 0;
+    font-size: 0.9rem;
+  }
+
+  /* ── VIDEO SECTION ── */
+  #video { background: var(--surface); }
+  .video-box {
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    aspect-ratio: 16/9;
+    margin-top: 2rem;
+    position: relative;
+    background: #000;
+  }
+  .video-box iframe { width: 100%; height: 100%; border: none; }
+
+  /* ── INTERACTIVE LAB ── */
+  #lab { background: var(--bg); }
+  .lab-container {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    overflow: hidden;
+    margin-top: 2rem;
+  }
+  .lab-header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 1rem 1.8rem;
+    display: flex; align-items: center; gap: 0.8rem;
+  }
+  .lab-dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot-red { background: #ff5f57; }
+  .dot-yellow { background: #febc2e; }
+  .dot-green { background: #28c840; }
+  .lab-title { font-family: 'DM Mono', monospace; font-size: 0.85rem; color: var(--muted); margin-left: 0.5rem; }
+  .lab-body { padding: 1.8rem; display: grid; grid-template-columns: 340px 1fr; gap: 1.8rem; }
+  @media(max-width:750px){ .lab-body{grid-template-columns:1fr} }
+
+  .input-panel h3 {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--accent);
+    letter-spacing: 1px;
+    margin-bottom: 1rem;
+  }
+  .input-group { margin-bottom: 1rem; }
+  .input-group label {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-bottom: 0.35rem;
+    font-family: 'DM Mono', monospace;
+  }
+  .input-group textarea, .input-group select {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 0.65rem 0.9rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.82rem;
+    resize: vertical;
+    transition: border-color 0.2s;
+  }
+  .input-group textarea:focus, .input-group select:focus {
+    outline: none; border-color: var(--accent);
+  }
+  .lab-run-btn {
+    width: 100%;
+    padding: 0.9rem;
+    background: var(--accent);
+    color: #000;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 0.5rem;
+  }
+  .lab-run-btn:hover { background: #00bbdd; transform: translateY(-2px); box-shadow: 0 8px 20px #00d4ff44; }
+
+  /* canvas panel */
+  .canvas-panel { display: flex; flex-direction: column; gap: 1rem; }
+  canvas#plotCanvas {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+  }
+  .results-box {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.2rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.82rem;
+    color: var(--muted);
+    min-height: 100px;
+  }
+  .result-line { display: flex; justify-content: space-between; margin: 0.4rem 0; }
+  .result-key { color: var(--muted); }
+  .result-val { color: var(--accent3); font-weight: 500; }
+  .result-val.green { color: var(--green); }
+
+  /* step-by-step */
+  .steps-trace {
+    margin-top: 1rem;
+    border-top: 1px solid var(--border);
+    padding-top: 1rem;
+  }
+  .step-badge {
+    display: inline-block;
+    background: var(--accent)22;
+    color: var(--accent);
+    border: 1px solid var(--accent)44;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    margin-bottom: 0.4rem;
+  }
+  .step-line { font-family: 'DM Mono', monospace; font-size: 0.78rem; color: var(--muted); margin: 0.2rem 0 0.2rem 1rem; }
+  .step-line span { color: var(--text); }
+
+  /* Prediction section */
+  .predict-row {
+    display: flex; gap: 0.8rem; margin-top: 1rem; flex-wrap: wrap;
+  }
+  .predict-row input {
+    background: var(--bg); border: 1px solid var(--border);
+    color: var(--text); border-radius: 8px;
+    padding: 0.6rem 0.9rem; font-family: 'DM Mono', monospace;
+    font-size: 0.85rem; width: 140px;
+    transition: border-color 0.2s;
+  }
+  .predict-row input:focus { outline: none; border-color: var(--accent); }
+  .predict-out {
+    margin-top: 0.8rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.95rem;
+    color: var(--green);
+    min-height: 1.4rem;
+  }
+
+  /* ── PARAMETERS ── */
+  .params-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.2rem;
+    margin-top: 1.5rem;
+  }
+  .param-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.5rem;
+  }
+  .param-name { font-family: 'DM Mono', monospace; font-size: 0.9rem; color: var(--accent); margin-bottom: 0.4rem; }
+  .param-formula { font-family: 'DM Mono', monospace; font-size: 0.82rem; color: var(--accent3); background: var(--bg); padding: 0.5rem 0.8rem; border-radius: 6px; margin: 0.5rem 0; }
+  .param-desc { font-size: 0.87rem; color: var(--muted); }
+
+  /* ── REFERENCES ── */
+  #references { background: var(--surface); }
+  .ref-list { list-style: none; margin-top: 1.5rem; }
+  .ref-list li {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.2rem 1.5rem;
+    margin-bottom: 0.8rem;
+    display: flex; align-items: flex-start; gap: 1rem;
+    transition: border-color 0.2s;
+  }
+  .ref-list li:hover { border-color: var(--accent)88; }
+  .ref-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--accent);
+    background: var(--accent)18;
+    padding: 0.3rem 0.6rem;
+    border-radius: 6px;
+    min-width: 40px;
+    text-align: center;
+    margin-top: 2px;
+  }
+  .ref-content {}
+  .ref-title { font-weight: 700; font-size: 0.95rem; margin-bottom: 0.25rem; }
+  .ref-meta { color: var(--muted); font-size: 0.82rem; margin-bottom: 0.25rem; }
+  .ref-link a { color: var(--accent); font-size: 0.82rem; font-family: 'DM Mono', monospace; text-decoration: none; }
+  .ref-link a:hover { text-decoration: underline; }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+    text-align: center;
+    padding: 3rem 2rem;
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+  footer span { color: var(--accent); }
+
+  /* ── DEV BY ── */
+  .devby-section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-top: 2rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.88rem;
+    color: var(--muted);
+  }
+  .devby-title { color: var(--accent); font-size: 0.75rem; letter-spacing: 2px; margin-bottom: 1rem; }
+  .devby-row { display: flex; gap: 2rem; flex-wrap: wrap; }
+  .devby-field label { color: var(--muted); font-size: 0.72rem; display: block; margin-bottom: 0.25rem; }
+  .devby-field span { color: var(--text); }
+
+  /* modal */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: #00000088;
+    z-index: 200;
+    align-items: center; justify-content: center;
+  }
+  .modal-overlay.active { display: flex; }
+  .modal-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2rem;
+    max-width: 500px;
+    width: 90%;
+    position: relative;
+  }
+  .modal-close {
+    position: absolute; top: 1rem; right: 1rem;
+    background: none; border: none; color: var(--muted);
+    font-size: 1.4rem; cursor: pointer;
+  }
+  .modal-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    margin-bottom: 1rem;
+  }
+  .modal-body { color: var(--muted); font-size: 0.9rem; line-height: 1.7; }
+  .modal-body ul { padding-left: 1.2rem; margin-top: 0.5rem; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">SLR Lab</div>
+  <div class="nav-links">
+    <a href="#concept">Learn</a>
+    <a href="#lab">Lab</a>
+    <a href="#video">Video</a>
+    <a href="#references">References</a>
+    <a href="#devby">About</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div style="position:relative;z-index:1">
+    <div class="hero-tag">CATEGORY 2 — MACHINE LEARNING</div>
+    <h1 class="hero-title">Simple<br><span>Linear Regression</span></h1>
+    <p class="hero-sub">Understand, visualize, and experiment with the most fundamental supervised learning algorithm — interactively.</p>
+    <div class="hero-eq">ŷ = β₀ + β₁x</div>
+    <div class="hero-btns">
+      <a href="#concept" class="btn btn-primary">📖 Learn</a>
+      <a href="#lab" class="btn btn-outline">🔬 Open Lab</a>
+      <button class="btn btn-red" onclick="showHelp()">❓ Help</button>
+      <button class="btn btn-outline" onclick="downloadPage()">⬇ Download</button>
+    </div>
+  </div>
+</section>
+
+<!-- CONCEPT SECTION -->
+<section id="concept">
+  <div class="section-inner">
+    <div class="section-label">01 — CONCEPT</div>
+    <h2 class="section-title">What is Simple Linear Regression?</h2>
+
+    <p style="color:var(--muted);max-width:720px;margin-bottom:2rem">Simple Linear Regression (SLR) is a supervised machine learning algorithm that models the linear relationship between one independent variable <strong style="color:var(--accent)">X</strong> (input) and one continuous dependent variable <strong style="color:var(--accent2)">Y</strong> (output). It fits a straight line through the data points to best predict future values.</p>
+
+    <div class="concept-grid">
+      <div class="concept-card">
+        <div class="card-icon">📐</div>
+        <div class="card-title">DEFINITION</div>
+        <div class="card-body">A statistical method that finds the best-fit line through data points, expressing Y as a linear function of X: <code style="color:var(--accent3)">ŷ = β₀ + β₁x</code>. The goal is to minimize prediction error.</div>
+      </div>
+      <div class="concept-card">
+        <div class="card-icon">🎯</div>
+        <div class="card-title">PURPOSE</div>
+        <div class="card-body">Predict unknown values of a dependent variable, understand the strength and direction of a relationship between two variables, and make data-driven decisions.</div>
+      </div>
+      <div class="concept-card">
+        <div class="card-icon">🌍</div>
+        <div class="card-title">REAL-WORLD USE</div>
+        <div class="card-body">House price prediction (area → price), salary estimation (experience → salary), weather forecasting, medical dosage estimation, stock trend analysis.</div>
+      </div>
+      <div class="concept-card">
+        <div class="card-icon">⚠️</div>
+        <div class="card-title">ASSUMPTIONS</div>
+        <div class="card-body">Linearity between X and Y, independence of observations, homoscedasticity (constant variance), and normally distributed residuals (errors).</div>
+      </div>
+    </div>
+
+    <!-- PARAMETERS SECTION -->
+    <h3 style="font-family:'Playfair Display',serif;font-size:1.5rem;margin:3rem 0 0.5rem">Key Parameters &amp; Variables</h3>
+    <p style="color:var(--muted);margin-bottom:0">Every parameter plays a crucial role in building the regression model.</p>
+    <div class="params-grid">
+      <div class="param-card">
+        <div class="param-name">β₀ — Intercept</div>
+        <div class="param-formula">β₀ = ȳ - β₁x̄</div>
+        <div class="param-desc">Value of Y when X = 0. It's the point where the regression line crosses the Y-axis.</div>
+      </div>
+      <div class="param-card">
+        <div class="param-name">β₁ — Slope</div>
+        <div class="param-formula">β₁ = Σ(xᵢ-x̄)(yᵢ-ȳ) / Σ(xᵢ-x̄)²</div>
+        <div class="param-desc">Rate of change of Y per unit change in X. Positive slope = positive relationship.</div>
+      </div>
+      <div class="param-card">
+        <div class="param-name">SSE — Sum of Squared Errors</div>
+        <div class="param-formula">SSE = Σ(yᵢ - ŷᵢ)²</div>
+        <div class="param-desc">Total squared difference between actual and predicted values. Lower is better.</div>
+      </div>
+      <div class="param-card">
+        <div class="param-name">R² — Coefficient of Determination</div>
+        <div class="param-formula">R² = 1 - SSE/SST</div>
+        <div class="param-desc">How well the model explains variance in Y. R² = 1 is a perfect fit; R² = 0 means no fit.</div>
+      </div>
+      <div class="param-card">
+        <div class="param-name">MSE — Mean Squared Error</div>
+        <div class="param-formula">MSE = SSE / n</div>
+        <div class="param-desc">Average squared prediction error across all data points. Key metric for model evaluation.</div>
+      </div>
+      <div class="param-card">
+        <div class="param-name">Pearson r — Correlation</div>
+        <div class="param-formula">r = Σ(x-x̄)(y-ȳ) / √[Σ(x-x̄)²·Σ(y-ȳ)²]</div>
+        <div class="param-desc">Measures linear relationship strength: −1 (perfect negative) to +1 (perfect positive).</div>
+      </div>
+    </div>
+
+    <!-- STEPWISE EXPLANATION -->
+    <h3 style="font-family:'Playfair Display',serif;font-size:1.5rem;margin:3rem 0 0.5rem">Step-by-Step Explanation</h3>
+    <table class="step-table">
+      <thead>
+        <tr><th>#</th><th>STEP</th><th>DESCRIPTION</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="highlight">1</td><td>Collect Data</td><td>Gather paired (X, Y) data points — your dataset.</td></tr>
+        <tr><td class="highlight">2</td><td>Compute Means</td><td>Calculate x̄ (mean of X) and ȳ (mean of Y).</td></tr>
+        <tr><td class="highlight">3</td><td>Compute Deviations</td><td>Find (xᵢ − x̄) and (yᵢ − ȳ) for each data point.</td></tr>
+        <tr><td class="highlight">4</td><td>Compute β₁</td><td>β₁ = Σ(xᵢ−x̄)(yᵢ−ȳ) ÷ Σ(xᵢ−x̄)² — the slope.</td></tr>
+        <tr><td class="highlight">5</td><td>Compute β₀</td><td>β₀ = ȳ − β₁·x̄ — the intercept.</td></tr>
+        <tr><td class="highlight">6</td><td>Build the Model</td><td>Write the equation: ŷ = β₀ + β₁·x</td></tr>
+        <tr><td class="highlight">7</td><td>Predict</td><td>Substitute new X values to get predicted Y (ŷ).</td></tr>
+        <tr><td class="highlight">8</td><td>Evaluate</td><td>Compute SSE, MSE, and R² to assess model quality.</td></tr>
+      </tbody>
+    </table>
+
+    <!-- WORKED EXAMPLE -->
+    <h3 style="font-family:'Playfair Display',serif;font-size:1.5rem;margin:3rem 0 0.5rem">Worked Example with Small Dataset</h3>
+    <p style="color:var(--muted);margin-bottom:1rem">Given: Study hours (X) and Exam scores (Y) for 5 students.</p>
+
+    <div class="example-box">
+      <table class="step-table" style="margin-top:0;margin-bottom:1.5rem">
+        <thead><tr><th>Student</th><th>X (Hours)</th><th>Y (Score)</th><th>x − x̄</th><th>y − ȳ</th><th>(x−x̄)(y−ȳ)</th><th>(x−x̄)²</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>1</td><td>55</td><td>−2</td><td>−17</td><td class="highlight2">34</td><td class="highlight2">4</td></tr>
+          <tr><td>2</td><td>2</td><td>60</td><td>−1</td><td>−12</td><td class="highlight2">12</td><td class="highlight2">1</td></tr>
+          <tr><td>3</td><td>3</td><td>70</td><td>0</td><td>−2</td><td class="highlight2">0</td><td class="highlight2">0</td></tr>
+          <tr><td>4</td><td>4</td><td>75</td><td>1</td><td>3</td><td class="highlight2">3</td><td class="highlight2">1</td></tr>
+          <tr><td>5</td><td>5</td><td>90</td><td>2</td><td>18</td><td class="highlight2">36</td><td class="highlight2">4</td></tr>
+          <tr><td colspan="5" style="color:var(--accent);font-weight:700">TOTALS</td><td class="highlight">85</td><td class="highlight">10</td></tr>
+        </tbody>
+      </table>
+
+      <ol class="example-steps">
+        <li>
+          <strong>Compute means:</strong>
+          <code class="math">x̄ = (1+2+3+4+5)/5 = 3 &nbsp;|&nbsp; ȳ = (55+60+70+75+90)/5 = 70</code>
+        </li>
+        <li>
+          <strong>Compute slope β₁:</strong>
+          <code class="math">β₁ = Σ(xᵢ−x̄)(yᵢ−ȳ) / Σ(xᵢ−x̄)² = 85 / 10 = <span style="color:var(--green)">8.5</span></code>
+        </li>
+        <li>
+          <strong>Compute intercept β₀:</strong>
+          <code class="math">β₀ = ȳ − β₁·x̄ = 70 − 8.5 × 3 = 70 − 25.5 = <span style="color:var(--green)">44.5</span></code>
+        </li>
+        <li>
+          <strong>Final regression equation:</strong>
+          <code class="math" style="font-size:1.05rem;color:var(--accent)">ŷ = 44.5 + 8.5x</code>
+        </li>
+        <li>
+          <strong>Predict score for 6 hours of study:</strong>
+          <code class="math">ŷ = 44.5 + 8.5 × 6 = 44.5 + 51 = <span style="color:var(--accent2)">95.5</span></code>
+        </li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<div class="divider" style="max-width:960px"></div>
+
+<!-- VIDEO SECTION -->
+<section id="video">
+  <div class="section-inner">
+    <div class="section-label">02 — VIDEO</div>
+    <h2 class="section-title">Watch the Concept Explained</h2>
+    <p style="color:var(--muted);margin-bottom:0.5rem">A curated YouTube explanation of Simple Linear Regression — covering intuition, math, and implementation.</p>
+    <div class="video-box" id="videoBox" onclick="loadVideo()" style="cursor:pointer;position:relative;background:#000;display:flex;align-items:center;justify-content:center;">
+      <!-- Thumbnail -->
+      <img id="videoThumb" src="https://img.youtube.com/vi/GhrxgbQnEEU/maxresdefault.jpg"
+        onerror="this.src='https://img.youtube.com/vi/GhrxgbQnEEU/hqdefault.jpg'"
+        style="width:100%;height:100%;object-fit:cover;display:block;border-radius:inherit;opacity:0.85" alt="Video thumbnail">
+      <!-- Play button overlay -->
+      <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none">
+        <div style="width:72px;height:72px;background:#ff0000dd;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 24px #0008;transition:transform .2s">
+          <div style="width:0;height:0;border-top:18px solid transparent;border-bottom:18px solid transparent;border-left:30px solid #fff;margin-left:6px"></div>
+        </div>
+      </div>
+      <!-- Label -->
+      <div style="position:absolute;bottom:0;left:0;right:0;padding:0.8rem 1.2rem;background:linear-gradient(transparent,#000c);font-family:'DM Mono',monospace;font-size:0.82rem;color:#fff;border-radius:0 0 20px 20px">
+        StatQuest with Josh Starmer — "Linear Regression, Clearly Explained!!!"
+      </div>
+    </div>
+    <p style="color:var(--muted);font-size:0.82rem;margin-top:0.8rem;font-family:'DM Mono',monospace">▶ Click the thumbnail above to open the video on YouTube · StatQuest with Josh Starmer</p>
+
+    <script>
+    function loadVideo() {
+      window.open('https://www.youtube.com/watch?v=GhrxgbQnEEU', '_blank');
+    }
+    document.getElementById('videoBox').addEventListener('mouseenter', function(){
+      this.querySelector('div div').style.transform='scale(1.12)';
+    });
+    document.getElementById('videoBox').addEventListener('mouseleave', function(){
+      this.querySelector('div div').style.transform='scale(1)';
+    });
+    </script>
+  </div>
+</section>
+
+<!-- INTERACTIVE LAB -->
+<section id="lab">
+  <div class="section-inner">
+    <div class="section-label">03 — INTERACTIVE LAB</div>
+    <h2 class="section-title">Run the Algorithm</h2>
+    <p style="color:var(--muted);margin-bottom:0.5rem">Enter your own X and Y data, execute the algorithm, and see step-by-step results with a live scatter plot and regression line.</p>
+
+    <div class="lab-container">
+      <div class="lab-header">
+        <div class="lab-dot dot-red"></div>
+        <div class="lab-dot dot-yellow"></div>
+        <div class="lab-dot dot-green"></div>
+        <span class="lab-title">slr_interactive_lab.py — running in browser</span>
+      </div>
+      <div class="lab-body">
+        <!-- INPUT PANEL -->
+        <div class="input-panel">
+          <h3>// DATA INPUT</h3>
+
+          <div class="input-group">
+            <label>X VALUES (comma-separated)</label>
+            <textarea id="xInput" rows="3" placeholder="e.g. 1, 2, 3, 4, 5">1, 2, 3, 4, 5</textarea>
+          </div>
+          <div class="input-group">
+            <label>Y VALUES (comma-separated)</label>
+            <textarea id="yInput" rows="3" placeholder="e.g. 55, 60, 70, 75, 90">55, 60, 70, 75, 90</textarea>
+          </div>
+          <div class="input-group">
+            <label>DATASET PRESET</label>
+            <select id="preset" onchange="loadPreset()">
+              <option value="custom">Custom Input</option>
+              <option value="hours">Study Hours vs Score</option>
+              <option value="salary">Experience vs Salary</option>
+              <option value="house">Area vs House Price</option>
+              <option value="temp">Temperature vs Ice Cream Sales</option>
+            </select>
+          </div>
+
+          <button class="lab-run-btn" id="nextStepBtn" onclick="nextStep()">▶ START / NEXT STEP</button>
+          <button class="lab-run-btn" onclick="resetLab()" style="background:transparent;color:var(--accent2);border:1px solid var(--accent2);margin-top:0.5rem">↺ RESET</button>
+
+          <div style="margin-top:1.5rem">
+            <h3>// PREDICT</h3>
+            <div class="input-group">
+              <label>ENTER X VALUE TO PREDICT</label>
+            </div>
+            <div class="predict-row">
+              <input type="number" id="predictX" placeholder="e.g. 6" step="any">
+              <button class="btn btn-outline" onclick="predict()" style="padding:0.6rem 1.2rem">Predict →</button>
+            </div>
+            <div class="predict-out" id="predictOut">▶ For X = 8 → ŷ = 55.6000</div>
+          </div>
+        </div>
+
+        <!-- CANVAS & RESULTS -->
+        <div class="canvas-panel">
+          <canvas id="plotCanvas" width="580" height="300"></canvas>
+          <div class="results-box" id="resultsBox">
+    <div style="color:var(--accent);font-size:0.72rem;letter-spacing:2px;margin-bottom:0.8rem">// REGRESSION RESULTS</div>
+    <div class="result-line"><span class="result-key">Equation</span><span class="result-val">ŷ = 80.4000 + -3.1000·x</span></div>
+    <div class="result-line"><span class="result-key">Intercept β₀</span><span class="result-val">80.4000</span></div>
+    <div class="result-line"><span class="result-key">Slope β₁</span><span class="result-val">-3.1000</span></div>
+    <div class="result-line"><span class="result-key">Data Points (n)</span><span class="result-val">5</span></div>
+    <div class="result-line"><span class="result-key">SSE</span><span class="result-val">3998.7000</span></div>
+    <div class="result-line"><span class="result-key">MSE</span><span class="result-val">799.7400</span></div>
+    <div class="result-line"><span class="result-key">RMSE</span><span class="result-val">28.2797</span></div>
+    <div class="result-line"><span class="result-key">R² Score</span><span class="result-val green">0.0235 (2.3% variance explained)</span></div>
+    <div class="result-line"><span class="result-key">Pearson r</span><span class="result-val">-0.1532</span></div>
+    
+    <div class="steps-trace">
+      <div style="color:var(--accent);font-size:0.72rem;letter-spacing:2px;margin-bottom:0.8rem">// STEP-BY-STEP EXECUTION TRACE</div>
+      <div class="step-badge">STEP 1 — DATA LOADED</div>
+      <div class="step-line">n = <span>5 data points</span></div>
+      <div class="step-badge" style="margin-top:0.6rem">STEP 2 — COMPUTE MEANS</div>
+      <div class="step-line">x̄ = <span>6.0000</span></div>
+      <div class="step-line">ȳ = <span>61.8000</span></div>
+      <div class="step-badge" style="margin-top:0.6rem">STEP 3 — COMPUTE DEVIATIONS</div>
+  <div class="step-line">Point 1: (x−x̄)=<span>-1.000</span>, (y−ȳ)=<span>-49.800</span>, product=<span>49.800</span></div><div class="step-line">Point 2: (x−x̄)=<span>-2.000</span>, (y−ȳ)=<span>36.200</span>, product=<span>-72.400</span></div><div class="step-line">Point 3: (x−x̄)=<span>0.000</span>, (y−ȳ)=<span>15.200</span>, product=<span>0.000</span></div><div class="step-line">Point 4: (x−x̄)=<span>1.000</span>, (y−ȳ)=<span>5.200</span>, product=<span>5.200</span></div><div class="step-line">Point 5: (x−x̄)=<span>2.000</span>, (y−ȳ)=<span>-6.800</span>, product=<span>-13.600</span></div>
+      <div class="step-badge" style="margin-top:0.6rem">STEP 4 — COMPUTE SLOPE β₁</div>
+      <div class="step-line">Σ(x−x̄)(y−ȳ) = <span>-31.0000</span></div>
+      <div class="step-line">Σ(x−x̄)² = <span>10.0000</span></div>
+      <div class="step-line">β₁ = -31.0000 / 10.0000 = <span style="color:var(--green)">-3.1000</span></div>
+      <div class="step-badge" style="margin-top:0.6rem">STEP 5 — COMPUTE INTERCEPT β₀</div>
+      <div class="step-line">β₀ = ȳ − β₁·x̄ = 61.8000 − -3.1000 × 6.0000 = <span style="color:var(--green)">80.4000</span></div>
+      <div class="step-badge" style="margin-top:0.6rem">STEP 6 — FINAL MODEL</div>
+      <div class="step-line" style="font-size:0.88rem">ŷ = <span style="color:var(--accent)">80.4000 + -3.1000·x</span></div>
+    </div>
+  
+  </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- REFERENCES -->
+<section id="references">
+  <div class="section-inner">
+    <div class="section-label">04 — REFERENCES</div>
+    <h2 class="section-title">Further Reading</h2>
+
+    <ul class="ref-list">
+      <li>
+        <div class="ref-num">[1]</div>
+        <div class="ref-content">
+          <div class="ref-title">Introduction to Statistical Learning (ISL) — Chapter 3: Linear Regression</div>
+          <div class="ref-meta">Gareth James, Daniela Witten, Trevor Hastie, Robert Tibshirani · Springer · Textbook</div>
+          <div class="ref-link"><a href="https://www.statlearning.com/" target="_blank">→ statlearning.com (Free PDF available)</a></div>
+        </div>
+      </li>
+      <li>
+        <div class="ref-num">[2]</div>
+        <div class="ref-content">
+          <div class="ref-title">Scikit-learn: Linear Regression Documentation</div>
+          <div class="ref-meta">Official Scikit-learn documentation with API reference and examples · Python ML Library</div>
+          <div class="ref-link"><a href="https://scikit-learn.org/stable/modules/linear_model.html" target="_blank">→ scikit-learn.org/linear_model</a></div>
+        </div>
+      </li>
+      <li>
+        <div class="ref-num">[3]</div>
+        <div class="ref-content">
+          <div class="ref-title">Machine Learning by Andrew Ng — Week 1: Linear Regression</div>
+          <div class="ref-meta">Coursera / DeepLearning.AI · Free course with video lectures and assignments</div>
+          <div class="ref-link"><a href="https://www.coursera.org/learn/machine-learning-course" target="_blank">→ coursera.org/learn/machine-learning</a></div>
+        </div>
+      </li>
+      <li>
+        <div class="ref-num">[4]</div>
+        <div class="ref-content">
+          <div class="ref-title">Khan Academy: Introduction to Linear Regression</div>
+          <div class="ref-meta">Free interactive educational resource with step-by-step video explanations</div>
+          <div class="ref-link"><a href="https://www.khanacademy.org/math/statistics-probability/describing-relationships-quantitative-data/introduction-to-trend-lines/a/linear-regression-review" target="_blank">→ khanacademy.org (Linear Regression)</a></div>
+        </div>
+      </li>
+      <li>
+        <div class="ref-num">[5]</div>
+        <div class="ref-content">
+          <div class="ref-title">StatQuest with Josh Starmer — Linear Regression YouTube Series</div>
+          <div class="ref-meta">Visual and intuitive explanations of regression concepts · YouTube Educational Channel</div>
+          <div class="ref-link"><a href="https://www.youtube.com/watch?v=GhrxgbQnEEU" target="_blank">→ youtube.com/StatQuest — Linear Regression</a></div>
+        </div>
+      </li>
+      <li>
+        <div class="ref-num">[6]</div>
+        <div class="ref-content">
+          <div class="ref-title">Wikipedia: Simple Linear Regression</div>
+          <div class="ref-meta">Comprehensive mathematical treatment with proofs, assumptions, and extensions</div>
+          <div class="ref-link"><a href="https://en.wikipedia.org/wiki/Simple_linear_regression" target="_blank">→ en.wikipedia.org/Simple_linear_regression</a></div>
+        </div>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- DEVELOPED BY -->
+<section id="devby" style="padding:3rem 2rem">
+  <div class="section-inner">
+    <div class="section-label">05 — PROJECT INFO</div>
+    <h2 class="section-title">Developed By</h2>
+    <div class="devby-section">
+      <div class="devby-title">// PROJECT METADATA</div>
+      <div class="devby-row">
+        <div class="devby-field"><label>PROJECT TITLE</label><span>Simple Linear Regression — ML Interactive Lab</span></div>
+        <div class="devby-field"><label>CATEGORY</label><span style="color:var(--accent)">Category 2 — Machine Learning</span></div>
+        <div class="devby-field"><label>TOPIC</label><span>Simple Linear Regression</span></div>
+        <div class="devby-field"><label>FRAMEWORK</label><span>Vanilla HTML / CSS / JavaScript</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>Simple Linear Regression Interactive Lab &nbsp;·&nbsp; Category 2: Machine Learning</p>
+  <p style="margin-top:0.5rem;font-size:0.78rem">Built by  <span>Ch.V.D.Teja </span> &nbsp;·&nbsp; <span>& R.Madesh</span></p>
+</footer>
+
+<!-- HELP MODAL -->
+<div class="modal-overlay" id="helpModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="document.getElementById('helpModal').classList.remove('active')">×</button>
+    <div class="modal-title">How to Use This Lab</div>
+    <div class="modal-body">
+      <strong>Navigation:</strong>
+      <ul>
+        <li>Use the top nav or scroll to explore each section.</li>
+        <li><strong>Learn</strong> — Read the concept, parameters, and worked example.</li>
+        <li><strong>Lab</strong> — Run the interactive algorithm with your own data.</li>
+        <li><strong>Video</strong> — Watch a curated YouTube explanation.</li>
+        <li><strong>References</strong> — Access textbooks, docs, and online resources.</li>
+      </ul>
+      <br>
+      <strong>Using the Interactive Lab:</strong>
+      <ul>
+        <li>Enter comma-separated X and Y values (same count).</li>
+        <li>Or choose a preset dataset from the dropdown.</li>
+        <em>Click <strong>START / NEXT STEP</strong> button in the lab</em>
+        <li>Enter an X value and click <em>Predict →</em> to get a prediction.</li>
+      </ul>
+      <br>
+      <strong>Tip:</strong> The scatter plot shows your data points in cyan and the regression line in red. The results panel shows all key metrics.
+    </div>
+  </div>
+</div>
+
+<script>
+  let currentStep = 0;
+  let tempModel = {};
+  let model = null;
+
+  // ── PROGRESS BAR (inject into lab-header)
+  (function(){
+    const lh = document.querySelector('.lab-header');
+    if(lh){
+      const pb = document.createElement('div');
+      pb.style.cssText='flex:1;height:3px;background:var(--border);border-radius:3px;overflow:hidden;margin-left:1rem';
+      pb.innerHTML='<div id="stepProgress" style="height:100%;width:0%;background:var(--accent);border-radius:3px;transition:width .4s ease"></div>';
+      lh.appendChild(pb);
+    }
+  })();
+
+  function setProgress(s,total){
+    const el=document.getElementById('stepProgress');
+    if(el) el.style.width=(s/total*100)+'%';
+  }
+
+// ── PRESETS
+const presets = {
+  hours: { x: [1,2,3,4,5,6,7], y: [55,60,70,75,90,95,100], label: 'Study Hours vs Exam Score' },
+  salary: { x: [1,2,3,4,5,6,7,8,9,10], y: [40,44,48,52,58,62,67,70,76,80], label: 'Experience (yrs) vs Salary (k)' },
+  house: { x: [500,700,900,1100,1300,1500,1700], y: [120,160,200,230,270,310,360], label: 'Area (sqft) vs Price (k)' },
+  temp: { x: [20,22,25,28,30,33,35,38], y: [50,60,80,100,120,150,160,200], label: 'Temperature (°C) vs Sales' }
+};
+
+function loadPreset() {
+  const v = document.getElementById('preset').value;
+  if (v === 'custom') return;
+  const p = presets[v];
+  document.getElementById('xInput').value = p.x.join(', ');
+  document.getElementById('yInput').value = p.y.join(', ');
+  resetLab();
+}
+
+function resetLab() {
+  currentStep = 0;
+  tempModel = {};
+  model = null;
+  setProgress(0, 6);
+  const box = document.getElementById('resultsBox');
+  box.innerHTML = '<div style="color:var(--muted);font-family:\'DM Mono\',monospace;font-size:0.82rem">Press <span style="color:var(--accent)">▶ START / NEXT STEP</span> to walk through the algorithm one step at a time.</div>';
+  document.getElementById('predictOut').textContent = '';
+  const canvas = document.getElementById('plotCanvas');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle='#0a0e1a'; ctx.fillRect(0,0,canvas.width,canvas.height);
+}
+
+// ── STEP-BY-STEP ENGINE
+function nextStep() {
+  const xRaw = document.getElementById('xInput').value.split(',').map(v=>parseFloat(v.trim())).filter(v=>!isNaN(v));
+  const yRaw = document.getElementById('yInput').value.split(',').map(v=>parseFloat(v.trim())).filter(v=>!isNaN(v));
+  const box = document.getElementById('resultsBox');
+
+  if (xRaw.length < 2 || yRaw.length < 2 || xRaw.length !== yRaw.length) {
+    box.innerHTML = '<div style="color:var(--accent2);font-family:\'DM Mono\',monospace;font-size:0.82rem">⚠ Enter equal numbers of valid X and Y values (minimum 2 each).</div>';
+    return;
+  }
+
+  const badge = (txt, mt) => `<div class="step-badge"${mt?' style="margin-top:'+mt+'"':''}>${txt}</div>`;
+  const line = (html) => `<div class="step-line">${html}</div>`;
+  const val = (v) => `<span>${v}</span>`;
+  const mono = (s) => `<span style="font-family:'DM Mono',monospace">${s}</span>`;
+
+  // ── STEP 1: Load data
+  if (currentStep === 0) {
+    tempModel = { xRaw, yRaw, n: xRaw.length };
+    setProgress(1,6);
+
+    const xRow = xRaw.map((v,i)=>`<td style="padding:3px 8px;border:1px solid var(--border);text-align:center">${v}</td>`).join('');
+    const yRow = yRaw.map((v,i)=>`<td style="padding:3px 8px;border:1px solid var(--border);text-align:center">${v}</td>`).join('');
+    const iRow = xRaw.map((_,i)=>`<td style="padding:3px 8px;border:1px solid var(--border);text-align:center;color:var(--muted)">${i+1}</td>`).join('');
+
+    box.innerHTML = `
+      <div style="color:var(--accent);font-size:0.72rem;letter-spacing:2px;margin-bottom:0.8rem">// STEP-BY-STEP EXECUTION</div>
+      ${badge('STEP 1 of 6 — DATA LOADED')}
+      ${line('n = ' + val(tempModel.n + ' data points'))}
+      <div style="margin-top:0.6rem;overflow-x:auto">
+        <table style="border-collapse:collapse;font-family:'DM Mono',monospace;font-size:0.78rem;margin-top:0.4rem">
+          <tr><td style="padding:3px 8px;border:1px solid var(--border);color:var(--accent)">i</td>${iRow}</tr>
+          <tr><td style="padding:3px 8px;border:1px solid var(--border);color:var(--accent)">x</td>${xRow}</tr>
+          <tr><td style="padding:3px 8px;border:1px solid var(--border);color:var(--accent)">y</td>${yRow}</tr>
+        </table>
+      </div>
+      <div style="margin-top:0.8rem;color:var(--muted);font-size:0.75rem">→ Click NEXT STEP to compute means</div>`;
+    currentStep++;
+  }
+
+  // ── STEP 2: Compute means
+  else if (currentStep === 1) {
+    tempModel.xMean = xRaw.reduce((a,b)=>a+b,0)/tempModel.n;
+    tempModel.yMean = yRaw.reduce((a,b)=>a+b,0)/tempModel.n;
+    setProgress(2,6);
+
+    box.innerHTML = `
+      <div style="color:var(--accent);font-size:0.72rem;letter-spacing:2px;margin-bottom:0.8rem">// STEP-BY-STEP EXECUTION</div>
+      ${badge('STEP 2 of 6 — COMPUTE MEANS')}
+      ${line('x&#772; = (' + xRaw.join('+') + ') / ' + tempModel.n + ' = ' + val(tempModel.xMean.toFixed(4)))}
+      ${line('y&#772; = (' + yRaw.join('+') + ') / ' + tempModel.n + ' = ' + val(tempModel.yMean.toFixed(4)))}
+      <div style="margin-top:0.8rem;color:var(--muted);font-size:0.75rem">→ Click NEXT STEP to build the deviation table</div>`;
+    currentStep++;
+  }
+
+  // ── STEP 3: Deviation table
+  else if (currentStep === 2) {
+    let num=0, den=0;
+    let devRows='', devHtml='';
+
+    for(let i=0;i<tempModel.n;i++){
+      const dx=xRaw[i]-tempModel.xMean, dy=yRaw[i]-tempModel.yMean;
+      num+=dx*dy; den+=dx*dx;
+      devRows+=`<tr>
+        <td style="padding:3px 8px;border:1px solid var(--border);text-align:center;color:var(--muted)">${i+1}</td>
+        <td style="padding:3px 8px;border:1px solid var(--border);text-align:center">${xRaw[i]}</td>
+        <td style="padding:3px 8px;border:1px solid var(--border);text-align:center">${yRaw[i]}</td>
+        <td style="padding:3px 8px;border:1px solid var(--border);text-align:center">${dx.toFixed(4)}</td>
+        <td style="padding:3px 8px;border:1px solid var(--border);text-align:center">${dy.toFixed(4)}</td>
+        <td style="padding:3px 8px;border:1px solid var(--border);text-align:center;color:var(--accent3)">${(dx*dy).toFixed(4)}</td>
+        <td style="padding:3px 8px;border:1px solid var(--border);text-align:center;color:var(--accent3)">${(dx*dx).toFixed(4)}</td>
+      </tr>`;
+    }
+    tempModel.num=num; tempModel.den=den;
+    setProgress(3,6);
+
+    box.innerHTML = `
+      <div style="color:var(--accent);font-size:0.72rem;letter-spacing:2px;margin-bottom:0.8rem">// STEP-BY-STEP EXECUTION</div>
+      ${badge('STEP 3 of 6 — COMPUTE DEVIATIONS')}
+      <div style="overflow-x:auto;margin-top:0.5rem">
+        <table style="border-collapse:collapse;font-family:'DM Mono',monospace;font-size:0.75rem">
+          <tr>
+            <th style="padding:4px 8px;border:1px solid var(--border);color:var(--accent);background:var(--accent)18">i</th>
+            <th style="padding:4px 8px;border:1px solid var(--border);color:var(--accent);background:var(--accent)18">x&#7522;</th>
+            <th style="padding:4px 8px;border:1px solid var(--border);color:var(--accent);background:var(--accent)18">y&#7522;</th>
+            <th style="padding:4px 8px;border:1px solid var(--border);color:var(--accent);background:var(--accent)18">(x&#7522;&#8722;x&#772;)</th>
+            <th style="padding:4px 8px;border:1px solid var(--border);color:var(--accent);background:var(--accent)18">(y&#7522;&#8722;y&#772;)</th>
+            <th style="padding:4px 8px;border:1px solid var(--border);color:var(--accent3);background:var(--accent)18">(x&#7522;&#8722;x&#772;)(y&#7522;&#8722;y&#772;)</th>
+            <th style="padding:4px 8px;border:1px solid var(--border);color:var(--accent3);background:var(--accent)18">(x&#7522;&#8722;x&#772;)&#178;</th>
+          </tr>
+          ${devRows}
+          <tr>
+            <td colspan="5" style="padding:3px 8px;border:1px solid var(--border);text-align:right;color:var(--muted);font-size:0.72rem">&Sigma;</td>
+            <td style="padding:3px 8px;border:1px solid var(--border);text-align:center;color:var(--green);font-weight:700">${num.toFixed(4)}</td>
+            <td style="padding:3px 8px;border:1px solid var(--border);text-align:center;color:var(--green);font-weight:700">${den.toFixed(4)}</td>
+          </tr>
+        </table>
+      </div>
+      <div style="margin-top:0.8rem;color:var(--muted);font-size:0.75rem">→ Click NEXT STEP to compute slope &beta;&#8321;</div>`;
+    currentStep++;
+  }
+
+  // ── STEP 4: Compute slope β₁
+  else if (currentStep === 3) {
+    tempModel.b1 = tempModel.num / tempModel.den;
+    setProgress(4,6);
+
+    box.innerHTML = `
+      <div style="color:var(--accent);font-size:0.72rem;letter-spacing:2px;margin-bottom:0.8rem">// STEP-BY-STEP EXECUTION</div>
+      ${badge('STEP 4 of 6 — COMPUTE SLOPE &beta;&#8321;')}
+      ${line('&beta;&#8321; = &Sigma;(x&#7522;&#8722;x&#772;)(y&#7522;&#8722;y&#772;) / &Sigma;(x&#7522;&#8722;x&#772;)&#178;')}
+      ${line('&beta;&#8321; = ' + tempModel.num.toFixed(4) + ' / ' + tempModel.den.toFixed(4) + ' = <span style="color:var(--green)">' + tempModel.b1.toFixed(4) + '</span>')}
+      <div style="margin-top:0.8rem;color:var(--muted);font-size:0.75rem">→ Click NEXT STEP to compute intercept &beta;&#8320;</div>`;
+    currentStep++;
+  }
+
+  // ── STEP 5: Compute intercept β₀
+  else if (currentStep === 4) {
+    tempModel.b0 = tempModel.yMean - tempModel.b1 * tempModel.xMean;
+    setProgress(5,6);
+
+    box.innerHTML = `
+      <div style="color:var(--accent);font-size:0.72rem;letter-spacing:2px;margin-bottom:0.8rem">// STEP-BY-STEP EXECUTION</div>
+      ${badge('STEP 5 of 6 — COMPUTE INTERCEPT &beta;&#8320;')}
+      ${line('&beta;&#8320; = y&#772; &#8722; &beta;&#8321;&#183;x&#772;')}
+      ${line('&beta;&#8320; = ' + tempModel.yMean.toFixed(4) + ' &#8722; ' + tempModel.b1.toFixed(4) + ' &times; ' + tempModel.xMean.toFixed(4) + ' = <span style="color:var(--green)">' + tempModel.b0.toFixed(4) + '</span>')}
+      <div style="margin-top:0.8rem;color:var(--muted);font-size:0.75rem">→ Click NEXT STEP to see the final model, metrics &amp; plot</div>`;
+    currentStep++;
+  }
+
+  // ── STEP 6: Final model + metrics + plot
+  else if (currentStep === 5) {
+    model = Object.assign({}, tempModel);
+    // compute full metrics
+    let sse=0, sst=0;
+    for(let i=0;i<model.n;i++){
+      const yh=model.b0+model.b1*xRaw[i];
+      sse+=(yRaw[i]-yh)**2;
+      sst+=(yRaw[i]-model.yMean)**2;
+    }
+    model.sse=sse; model.mse=sse/model.n; model.rmse=Math.sqrt(sse/model.n);
+    model.r2=sst?1-sse/sst:0;
+    model.r=Math.sqrt(Math.abs(model.r2))*(model.b1>=0?1:-1);
+    setProgress(6,6);
+
+    let predRows='';
+    for(let i=0;i<model.n;i++){
+      const yh=model.b0+model.b1*xRaw[i], res=yRaw[i]-yh;
+      predRows+=`<tr>
+        <td style="padding:3px 8px;border:1px solid var(--border);text-align:center">${xRaw[i]}</td>
+        <td style="padding:3px 8px;border:1px solid var(--border);text-align:center">${yRaw[i]}</td>
+        <td style="padding:3px 8px;border:1px solid var(--border);text-align:center;color:var(--accent3)">${yh.toFixed(4)}</td>
+        <td style="padding:3px 8px;border:1px solid var(--border);text-align:center;color:var(--muted)">${res.toFixed(4)}</td>
+      </tr>`;
+    }
+
+    box.innerHTML = `
+      <div style="color:var(--accent);font-size:0.72rem;letter-spacing:2px;margin-bottom:0.8rem">// REGRESSION RESULTS</div>
+      <div class="result-line"><span class="result-key">Equation</span><span class="result-val">&#375; = ${model.b0.toFixed(4)} + ${model.b1.toFixed(4)}&#183;x</span></div>
+      <div class="result-line"><span class="result-key">Intercept &beta;&#8320;</span><span class="result-val">${model.b0.toFixed(4)}</span></div>
+      <div class="result-line"><span class="result-key">Slope &beta;&#8321;</span><span class="result-val">${model.b1.toFixed(4)}</span></div>
+      <div class="result-line"><span class="result-key">Data Points (n)</span><span class="result-val">${model.n}</span></div>
+      <div class="result-line"><span class="result-key">SSE</span><span class="result-val">${model.sse.toFixed(4)}</span></div>
+      <div class="result-line"><span class="result-key">MSE</span><span class="result-val">${model.mse.toFixed(4)}</span></div>
+      <div class="result-line"><span class="result-key">RMSE</span><span class="result-val">${model.rmse.toFixed(4)}</span></div>
+      <div class="result-line"><span class="result-key">R&#178; Score</span><span class="result-val green">${model.r2.toFixed(4)} (${(model.r2*100).toFixed(1)}% variance explained)</span></div>
+      <div class="result-line"><span class="result-key">Pearson r</span><span class="result-val">${model.r.toFixed(4)}</span></div>
+
+      <div class="steps-trace">
+        <div style="color:var(--accent);font-size:0.72rem;letter-spacing:2px;margin-bottom:0.8rem">// STEP-BY-STEP EXECUTION TRACE</div>
+        ${badge('STEP 1 — DATA LOADED')}
+        ${line('n = ' + val(model.n + ' data points'))}
+        ${badge('STEP 2 — COMPUTE MEANS','0.6rem')}
+        ${line('x&#772; = ' + val(model.xMean.toFixed(4)))}
+        ${line('y&#772; = ' + val(model.yMean.toFixed(4)))}
+        ${badge('STEP 3 — COMPUTE DEVIATIONS','0.6rem')}
+        ${xRaw.map((xi,i)=>{const dx=xi-model.xMean,dy=yRaw[i]-model.yMean;return line('Point '+(i+1)+': (x&#8722;x&#772;)='+val(dx.toFixed(3))+', (y&#8722;y&#772;)='+val(dy.toFixed(3))+', product='+val((dx*dy).toFixed(3)));}).join('')}
+        ${badge('STEP 4 — COMPUTE SLOPE &beta;&#8321;','0.6rem')}
+        ${line('&Sigma;(x&#8722;x&#772;)(y&#8722;y&#772;) = ' + val(model.num.toFixed(4)))}
+        ${line('&Sigma;(x&#8722;x&#772;)&#178; = ' + val(model.den.toFixed(4)))}
+        ${line('&beta;&#8321; = '+model.num.toFixed(4)+' / '+model.den.toFixed(4)+' = <span style="color:var(--green)">'+model.b1.toFixed(4)+'</span>')}
+        ${badge('STEP 5 — COMPUTE INTERCEPT &beta;&#8320;','0.6rem')}
+        ${line('&beta;&#8320; = y&#772; &#8722; &beta;&#8321;&#183;x&#772; = '+model.yMean.toFixed(4)+' &#8722; '+model.b1.toFixed(4)+' &times; '+model.xMean.toFixed(4)+' = <span style="color:var(--green)">'+model.b0.toFixed(4)+'</span>')}
+        ${badge('STEP 6 — FINAL MODEL','0.6rem')}
+        <div class="step-line" style="font-size:0.88rem">&#375; = <span style="color:var(--accent)">${model.b0.toFixed(4)} + ${model.b1.toFixed(4)}&#183;x</span></div>
+      </div>
+
+      <div style="margin-top:1rem;border-top:1px solid var(--border);padding-top:0.8rem">
+        <div style="color:var(--accent);font-size:0.72rem;letter-spacing:2px;margin-bottom:0.6rem">// PREDICTIONS TABLE</div>
+        <div style="overflow-x:auto">
+          <table style="border-collapse:collapse;font-family:'DM Mono',monospace;font-size:0.75rem;width:100%">
+            <tr>
+              <th style="padding:4px 8px;border:1px solid var(--border);color:var(--accent);background:var(--accent)18">x&#7522;</th>
+              <th style="padding:4px 8px;border:1px solid var(--border);color:var(--accent);background:var(--accent)18">y&#7522; (actual)</th>
+              <th style="padding:4px 8px;border:1px solid var(--border);color:var(--accent3);background:var(--accent)18">&#375;&#7522; (predicted)</th>
+              <th style="padding:4px 8px;border:1px solid var(--border);color:var(--muted);background:var(--accent)18">residual</th>
+            </tr>
+            ${predRows}
+          </table>
+        </div>
+      </div>`;
+
+    drawPlot();
+    currentStep = 0;
+  }
+}
+
+// ── PLOT
+function drawPlot() {
+  const { b0, b1, xRaw, yRaw } = model;
+  const canvas = document.getElementById('plotCanvas');
+  const ctx = canvas.getContext('2d');
+
+  const W = canvas.width, H = canvas.height;
+  const pad = { t: 24, r: 24, b: 44, l: 54 };
+  const plotW = W - pad.l - pad.r;
+  const plotH = H - pad.t - pad.b;
+
+  const xMin = Math.min(...xRaw), xMax = Math.max(...xRaw);
+  const yMin = Math.min(...yRaw), yMax = Math.max(...yRaw);
+  const xRange = xMax - xMin || 1, yRange = yMax - yMin || 1;
+  const xPad = xRange * 0.15, yPad = yRange * 0.15;
+
+  const toCanX = x => pad.l + ((x - (xMin-xPad)) / (xRange+2*xPad)) * plotW;
+  const toCanY = y => pad.t + plotH - ((y - (yMin-yPad)) / (yRange+2*yPad)) * plotH;
+
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#0a0e1a';
+  ctx.fillRect(0, 0, W, H);
+
+  // grid
+  ctx.strokeStyle = '#2a3550';
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= 5; i++) {
+    const y = pad.t + (i/5)*plotH;
+    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(W-pad.r, y); ctx.stroke();
+    const x = pad.l + (i/5)*plotW;
+    ctx.beginPath(); ctx.moveTo(x, pad.t); ctx.lineTo(x, H-pad.b); ctx.stroke();
+  }
+
+  // axes
+  ctx.strokeStyle = '#4a5a7a'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(pad.l, pad.t); ctx.lineTo(pad.l, H-pad.b); ctx.lineTo(W-pad.r, H-pad.b); ctx.stroke();
+
+  // regression line
+  const x1 = xMin - xPad, x2 = xMax + xPad;
+  const y1 = b0 + b1*x1, y2 = b0 + b1*x2;
+  ctx.strokeStyle = '#ff6b6b'; ctx.lineWidth = 2.5;
+  ctx.setLineDash([]);
+  ctx.beginPath();
+  ctx.moveTo(toCanX(x1), toCanY(y1));
+  ctx.lineTo(toCanX(x2), toCanY(y2));
+  ctx.stroke();
+
+  // residual lines
+  ctx.strokeStyle = '#ffd16666'; ctx.lineWidth = 1; ctx.setLineDash([4,3]);
+  for (let i = 0; i < xRaw.length; i++) {
+    const yHat = model.b0 + model.b1 * xRaw[i];
+    ctx.beginPath();
+    ctx.moveTo(toCanX(xRaw[i]), toCanY(yRaw[i]));
+    ctx.lineTo(toCanX(xRaw[i]), toCanY(yHat));
+    ctx.stroke();
+  }
+  ctx.setLineDash([]);
+
+  // data points
+  for (let i = 0; i < xRaw.length; i++) {
+    const cx = toCanX(xRaw[i]), cy = toCanY(yRaw[i]);
+    ctx.beginPath();
+    ctx.arc(cx, cy, 5, 0, Math.PI*2);
+    ctx.fillStyle = '#00d4ff';
+    ctx.fill();
+    ctx.strokeStyle = '#ffffff33'; ctx.lineWidth = 1.5;
+    ctx.stroke();
+  }
+
+  // labels
+  ctx.fillStyle = '#7a8aaa'; ctx.font = '11px DM Mono, monospace'; ctx.textAlign = 'center';
+  ctx.fillText('X', W/2, H-8);
+  ctx.save(); ctx.translate(14, H/2); ctx.rotate(-Math.PI/2);
+  ctx.fillText('Y', 0, 0); ctx.restore();
+
+  // legend
+  ctx.fillStyle = '#00d4ff'; ctx.beginPath(); ctx.arc(pad.l+10, pad.t+10, 4, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#e8eaf0'; ctx.textAlign = 'left'; ctx.font = '10px DM Mono,monospace';
+  ctx.fillText('Data Points', pad.l+18, pad.t+14);
+  ctx.strokeStyle = '#ff6b6b'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(pad.l+100, pad.t+10); ctx.lineTo(pad.l+120, pad.t+10); ctx.stroke();
+  ctx.fillStyle = '#ff6b6b'; ctx.fillText('Regression Line', pad.l+124, pad.t+14);
+  ctx.strokeStyle = '#ffd166'; ctx.setLineDash([3,2]); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(pad.l+240, pad.t+10); ctx.lineTo(pad.l+260, pad.t+10); ctx.stroke();
+  ctx.setLineDash([]); ctx.fillStyle = '#ffd166'; ctx.fillText('Residuals', pad.l+264, pad.t+14);
+}
+
+function predict() {
+  if (!model) { alert('Run the algorithm first!'); return; }
+  const xVal = parseFloat(document.getElementById('predictX').value);
+  if (isNaN(xVal)) { alert('Enter a valid number.'); return; }
+  const yHat = model.b0 + model.b1 * xVal;
+  document.getElementById('predictOut').textContent = `▶ For X = ${xVal} → ŷ = ${yHat.toFixed(4)}`;
+}
+
+function showHelp() {
+  document.getElementById('helpModal').classList.add('active');
+}
+
+function downloadPage() {
+  const el = document.createElement('a');
+  el.href = window.location.href;
+  el.download = 'simple_linear_regression.html';
+  const blob = new Blob([document.documentElement.outerHTML], {type:'text/html'});
+  el.href = URL.createObjectURL(blob);
+  el.click();
+}
+
+// Close modal on overlay click
+document.getElementById('helpModal').addEventListener('click', function(e){
+  if (e.target === this) this.classList.remove('active');
+});
+
+// Init canvas on load
+window.addEventListener('load', () => {
+  const canvas = document.getElementById('plotCanvas');
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle='#0a0e1a'; ctx.fillRect(0,0,canvas.width,canvas.height);
+});
+</script>
+
+
+</body></html>
