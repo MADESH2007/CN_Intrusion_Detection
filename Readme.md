@@ -1,79 +1,94 @@
-📈 Simple Linear Regression — ML Interactive Lab
+Simple Linear Regression — Interactive ML Lab
 
+A browser-based interactive lab to learn and experiment with Simple Linear Regression (SLR).
+This project demonstrates how a regression model is built step-by-step, with real-time visualization and predictions.
 
+Overview
 
+This application helps users understand the fundamentals of linear regression by:
 
+Explaining core concepts and formulas
+Walking through calculations step-by-step
+Visualizing data points and regression line
+Allowing custom dataset experimentation
 
+It is designed for students and beginners in machine learning.
 
+Features
+1. Concept Explanation
+Definition of Simple Linear Regression
 
+Mathematical model:
 
-An interactive web-based lab to learn, visualize, and experiment with Simple Linear Regression (SLR) — one of the most important algorithms in Machine Learning.
-
-🚀 Live Preview
-
-Open the project locally or deploy using GitHub Pages.
-
-# Run locally
-open index.html
-📖 Overview
-
-This project is a fully interactive learning tool that helps you:
-
-Understand the math behind regression
-Execute the algorithm step-by-step
-Visualize data and model behavior
-Experiment with your own datasets
-✨ Features
-📚 Concept Learning
-Clear explanation of SLR
-Mathematical formulas and intuition
-Real-world applications
-🧮 Step-by-Step Execution Engine
-Walk through the full algorithm:
-Mean calculation
-Deviations
-Slope (β₁)
+ŷ = β₀ + β₁x
+Key parameters:
 Intercept (β₀)
-Final equation
-🔬 Interactive Lab
-Enter custom datasets
-Use built-in presets:
-📘 Study Hours vs Score
-💼 Experience vs Salary
-🏠 House Area vs Price
-🌡️ Temperature vs Sales
-Run algorithm step-by-step
-📊 Visualization
-Scatter plot
+Slope (β₁)
+SSE, MSE, RMSE
+R² score
+Pearson correlation coefficient
+2. Step-by-Step Algorithm Execution
+
+The lab breaks down regression into clear steps:
+
+Load dataset
+Compute mean values
+Calculate deviations
+Compute slope (β₁)
+Compute intercept (β₀)
+Build final regression model
+3. Interactive Lab
+Input custom X and Y values (comma-separated)
+Built-in dataset presets:
+Study Hours vs Score
+Experience vs Salary
+House Area vs Price
+Temperature vs Sales
+Step-by-step execution with detailed trace
+4. Visualization
+Scatter plot of data points
 Regression line
 Residual lines
-Real-time rendering using Canvas
-🔮 Prediction Tool
-Predict Y for any given X
-Instant output using trained model
-🎥 Learning Support
-Integrated YouTube explanation
-🛠️ Tech Stack
-Layer	Technology
-Frontend	HTML5, CSS3
-Logic	Vanilla JavaScript
-Visualization	HTML Canvas API
-Fonts	Google Fonts
-📂 Project Structure
+Rendered using HTML Canvas
+5. Prediction
+Enter any X value
+Get predicted Y instantly using trained model
+6. Learning Support
+Embedded video explanation
+References for further study
+Tech Stack
+HTML5
+CSS3
+Vanilla JavaScript
+HTML Canvas API
+
+No external frameworks or libraries are used.
+
+Project Structure
 simple-linear-regression-lab/
 │
-├── index.html
-├── README.md
-⚙️ Getting Started
-1. Clone the Repository
+├── index.html      # Complete application (UI + logic)
+└── README.md       # Documentation
+Getting Started
+Run Locally
+
+Clone the repository:
+
 git clone https://github.com/your-username/simple-linear-regression-lab.git
+
+Open the project:
+
 cd simple-linear-regression-lab
-2. Run the Project
-open index.html
-
-Or just double-click the file.
-
-🧪 Example
+Run the file:
+Double-click index.html, or
+Open it in any modern browser
+Usage
+Navigate to the Lab section
+Enter X and Y values (same number of values)
+Click START / NEXT STEP
+Follow each step of computation
+Use the Predict feature for new inputs
+Example
 
 Input:
 
@@ -83,53 +98,26 @@ Y: 55, 60, 70, 75, 90
 Output:
 
 ŷ = 44.5 + 8.5x
-📸 Screenshots (Add Later)
+Deployment
 
-Add screenshots here after uploading images to your repo
+You can deploy this project using GitHub Pages:
 
-![Lab UI](screenshots/lab.png)
-![Graph](screenshots/graph.png)
-🎯 Learning Outcomes
-Understand regression intuitively and mathematically
-Learn how models are built from scratch
-Interpret evaluation metrics (R², MSE, etc.)
-Visualize relationships between variables
-📚 References
-📘 Introduction to Statistical Learning (ISL)
-🤖 Scikit-learn Documentation
-🎓 Andrew Ng Machine Learning Course
-📊 Khan Academy
-📺 StatQuest (YouTube)
-👨‍💻 Authors
-Ch.V.D. Teja
-R. Madesh
-🌐 Deployment (GitHub Pages)
 Go to repository Settings
-Navigate to Pages
-Select branch → main
+Open Pages
+Select branch: main
 Save
 
-Your site will be live at:
+Your app will be available at:
 
 https://your-username.github.io/simple-linear-regression-lab/
-⭐ Contributing
-
-Contributions are welcome!
-
-# Fork the repo
-# Create a new branch
-git checkout -b feature-name
-
-# Commit changes
-git commit -m "Added feature"
-
-# Push
-git push origin feature-name
-📌 Future Improvements
-Multiple Linear Regression
+Future Improvements
+Multiple Linear Regression support
 Gradient Descent visualization
 Export results (CSV/PDF)
-Mobile optimization
-📄 License
+Improved mobile responsiveness
+Authors
+Ch.V.D. Teja
+R. Madesh
+License
 
-This project is open-source and available under the MIT License.
+This project is licensed under the MIT License.
